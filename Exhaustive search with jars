@@ -1,0 +1,232 @@
+
+(
+	defstruct nodesch
+	
+		state
+		path
+)
+
+
+(
+	defun successors(node)
+		(setf all_successors '())
+		
+		(do((i 0 (incf i))) ((= i (length *operators*)) all_successors)
+			(setf new_state (successor node (nth i *operators*)))
+			
+			(cond 	(new_state
+					(setf new_node (make-nodesch
+									:state new_state
+									:path (cons (nth i *operators*) (nodesch-path node))
+					))
+					(push new_node all_successors)
+					)
+			)
+			
+		)
+		
+)
+
+(
+	defun myapply (operator state)
+		(funcall (symbol-function operator) state)
+)
+
+(
+	defun successor(node operator)
+		(myapply operator (nodesch-state node))
+)
+
+
+(
+	defun is-there(node nodes)
+		(dolist (x nodes)
+			(if (equalp (nodesch-state node) (nodesch-state x)) (return T))
+			
+
+		)
+)
+
+(
+	defun remove-node(l1 l2 l3)
+		(setf new_list '())
+		
+		(dolist (x l1 new_list)
+			(if (or (is-there x l2) (is-there x l3)) ()(push x new_list))
+		)		
+)
+
+(
+	defun new-successors(node l1 l2)
+		(remove-node (successors node) l1 l2)
+)
+
+
+
+
+
+(
+	defun depth-first-search()
+		(setf node1 (make-nodesch
+			:state *initial-state*
+			:path '()
+		))
+
+		(setf open '())
+		(push node1 open)
+		(setf closed '())
+		(setf actual nil)
+		(setf new-successors '())
+		
+		(loop  
+			(if (= (length open) 0) (return))
+			
+			(setf actual (car open))
+			(setf open (cdr open))
+			(push actual closed)
+			
+			(cond	((is-final (nodesch-state actual))  (return actual))
+					(t 
+					(setf new-successors (new-successors actual open closed))
+					(setf open (nconc new-successors open))
+					)
+			)
+			
+		)
+)
+
+
+(
+	defun width-first-search()
+		(setf node1 (make-nodesch
+			:state *initial-state*
+			:path '()
+		))
+
+		(setf open '())
+		(push node1 open)
+		(setf closed '())
+		(setf actual nil)
+		(setf new-successors '())
+		
+		(loop  
+			(if (= (length open) 0) (return))
+			
+			(setf actual (car open))
+			(setf open (cdr open))
+			(push actual closed)
+			
+			(cond	((is-final (nodesch-state actual))  (return actual))
+					(t 
+					(setf new-successors (new-successors actual open closed))
+					(setf open (append open new-successors))
+					)
+			)
+		)
+)
+
+
+
+
+
+(
+	defun create-state(x y)
+		(list x y)
+)
+
+
+
+(
+	defun content_jar-4(state)
+		(car state)
+)
+
+
+(
+	defun content_jar-3(state)
+		(car(cdr state))
+)
+
+
+
+
+(setf *initial-state* (create-state 0 0))
+
+
+
+(
+	defun is-final(state)
+		(equal (content_jar-4 state) 2)
+)
+
+
+
+
+(setf *operators* '(fill_jar_4 fill_jar_3 empty_Jar_4 empty_Jar_3 drop_Jar_4_into_Jar_3 drop_Jar_3_into_Jar_4))
+
+
+
+
+
+(
+	defun fill_jar_4(state)
+		(if (< (content_jar-4 state) 4) (create-state 4 (content_jar-3 state)))
+)
+
+
+
+
+(
+	defun fill_jar_3(state)
+		(if (< (content_jar-3 state) 3) (create-state (content_jar-4 state) 3 ))
+)
+
+
+
+
+(
+	defun empty_jar_4(state)
+		(if (> (content_jar-4 state) 0) (create-state 0 (content_jar-3 state)))
+)
+
+
+
+
+(
+	defun empty_jar_3(state)
+		(if (> (content_jar-3 state) 0) (create-state (content_jar-4 state) 0))
+)
+
+
+
+
+(
+	defun drop_Jar_4_into_Jar_3(state)
+		(setf x (content_jar-4 state))
+		(setf y (content_jar-3 state))
+
+		(if (<= (+ x y) 3) (create-state 0 (+ x y)) (create-state (- x (- 3 y)) 3))
+)
+
+
+
+
+
+(
+	defun drop_Jar_3_into_Jar_4(state)
+		(setf x (content_jar-4 state))
+		(setf y (content_jar-3 state))
+		
+		(if (<= (+ x y) 4) (create-state (+ x y) 0) (create-state 4 (- y (- 4 x))))
+		
+)
+
+
+
+
+
+
+
+
+
+
